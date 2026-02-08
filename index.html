@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoBus - Комфортные поездки по Грузии</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-van-shuttle text-blue-600 text-2xl"></i>
+                    <span class="font-bold text-xl tracking-tight text-gray-900">Geo<span class="text-blue-600">Bus</span></span>
+                </div>
+
+                <div class="hidden md:flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600 font-mono">
+                    <i class="fa-regular fa-clock text-blue-500"></i>
+                    <span id="live-clock">--:--:--</span>
+                    <span class="text-xs text-gray-400">Tbilisi Time</span>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-500 hover:text-blue-600 font-medium transition">Главная</a>
+                    <a href="#schedule" class="text-gray-500 hover:text-blue-600 font-medium transition">Расписание</a>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    <a href="#" class="text-blue-500 hover:text-blue-700 transition"><i class="fa-brands fa-telegram text-2xl"></i></a>
+                    <a href="#" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100 transition">Войти</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <section class="hero-bg h-[500px] flex items-center justify-center text-center px-4 relative">
+            <div class="max-w-3xl text-white">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Путешествуй по Грузии с комфортом</h1>
+                <p class="text-lg md:text-xl text-gray-200 mb-8 drop-shadow-md">Бронируйте места онлайн. Без очередей на вокзале.</p>
+            </div>
+        </section>
+
+        <div class="max-w-4xl mx-auto px-4 relative -mt-24 z-10 mb-16">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Откуда</label>
+                        <div class="flex items-center border-b-2 border-gray-200 py-2">
+                            <i class="fa-solid fa-location-dot text-gray-400 mr-3"></i>
+                            <select class="appearance-none bg-transparent border-none w-full text-gray-700 font-semibold focus:outline-none">
+                                <option>Тбилиси</option>
+                                <option>Кутаиси</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Куда</label>
+                        <div class="flex items-center border-b-2 border-gray-200 py-2">
+                            <i class="fa-solid fa-location-arrow text-gray-400 mr-3"></i>
+                            <select class="appearance-none bg-transparent border-none w-full text-gray-700 font-semibold focus:outline-none">
+                                <option>Батуми</option>
+                                <option>Казбеги</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="scrollToResults()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-105">
+                            Найти рейс
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="about" class="max-w-6xl mx-auto px-4 mb-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <span class="text-blue-600 font-bold uppercase tracking-wider text-sm">О Сервисе</span>
+                    <h2 class="text-3xl font-bold text-gray-900 mt-2 mb-6">Ваша точка отправления</h2>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        Мы устали от хаоса на вокзалах. GeoBus — это первый цифровой автовокзал Грузии. 
+                        Мы объединяем лучших водителей и предоставляем вам гарантию посадки.
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">Отправление точно по расписанию</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">Фиксированная цена без торгов</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">Поддержка диспетчера 24/7 в Telegram</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white p-2 rounded-2xl shadow-lg transform rotate-1 hover:rotate-0 transition duration-500">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2975.888747713833!2d44.77977031543764!3d41.76725697923106!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x404472851167a57d%3A0x6b1e6207e7428f72!2sDidube%20Bus%20Station!5e0!3m2!1sen!2sge!4v1678123456789!5m2!1sen!2sge" 
+                        width="100%" 
+                        height="350" 
+                        style="border:0; border-radius: 1rem;" 
+                        allowfullscreen="" 
+                        loading="lazy">
+                    </iframe>
+                    <div class="p-4 text-center">
+                        <p class="text-sm font-bold text-gray-800"><i class="fa-solid fa-map-pin text-red-500 mr-2"></i>Вокзал "Дидубе", Тбилиси</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="schedule" class="bg-white py-16 border-t border-gray-200">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-gray-900">Расписание рейсов</h2>
+                    <p class="text-gray-500 mt-2">Выберите удобную дату поездки</p>
+                </div>
+                <div id="date-tabs" class="flex overflow-x-auto space-x-2 pb-4 mb-6 no-scrollbar">
+                    </div>
+                <div id="rides-container" class="space-y-6 min-h-[300px]">
+                    </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-gray-300 py-16">
+        <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="col-span-1 md:col-span-1">
+                <span class="text-2xl font-bold text-white tracking-tight">Geo<span class="text-blue-500">Bus</span></span>
+                <p class="mt-4 text-gray-400 text-sm leading-relaxed">
+                    Первый в Грузии сервис комфортного бронирования.
+                </p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6 uppercase text-sm tracking-wider">Маршруты</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="hover:text-blue-400 transition">Тбилиси — Батуми</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">Тбилиси — Кутаиси</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6 uppercase text-sm tracking-wider">Инфо</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="hover:text-blue-400 transition">Как это работает</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">Партнерам</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6 uppercase text-sm tracking-wider">Контакты</h4>
+                <ul class="space-y-4 text-sm">
+                    <li class="flex items-center gap-3">
+                        <i class="fa-brands fa-telegram text-blue-500"></i> @GeoBusSupport
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="fa-solid fa-phone text-gray-400"></i> +995 555 00 00 00
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-70 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden transform transition-all grid grid-cols-1 md:grid-cols-5">
+            
+            <div class="md:col-span-2 bg-gray-50 border-r border-gray-100 flex flex-col">
+                <div class="h-32 bg-gray-200 overflow-hidden relative">
+                    <img id="modal-car-img" src="" alt="Car" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
+                    <div class="absolute bottom-2 left-3 text-white">
+                        <p class="font-bold text-sm" id="modal-car-name">Mercedes Sprinter</p>
+                    </div>
+                </div>
+                
+                <div class="px-6 relative -mt-8 mb-4">
+                    <img id="modal-driver-img" src="" alt="Driver" class="w-16 h-16 rounded-full border-4 border-white shadow-md object-cover">
+                </div>
+
+                <div class="px-6 pb-6">
+                    <h3 class="font-bold text-gray-800 text-lg" id="modal-driver-name">Гига</h3>
+                    <div class="flex items-center text-yellow-400 text-sm mb-2">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star-half-stroke"></i>
+                        <span class="text-gray-400 ml-2 font-medium">4.8</span>
+                    </div>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        Опытный водитель, стаж 15 лет. Не курит в салоне. Говорит на русском и грузинском.
+                    </p>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Маршрут</p>
+                        <p class="text-blue-600 font-bold" id="modal-route">--</p>
+                        <p class="text-gray-600 font-medium mt-1" id="modal-time">--:--</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-3 p-6 md:p-8 flex flex-col justify-between relative">
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Детали бронирования</h3>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-500 mb-2">Сколько мест?</label>
+                        <div class="flex items-center gap-4">
+                            <button onclick="changeSeats(-1)" class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold transition">-</button>
+                            <span id="seat-count" class="text-2xl font-bold text-gray-800 w-8 text-center">1</span>
+                            <button onclick="changeSeats(1)" class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold transition">+</button>
+                        </div>
+                    </div>
+
+                    <label class="flex items-center p-3 border border-blue-100 bg-blue-50/50 rounded-xl cursor-pointer hover:bg-blue-50 transition mb-6">
+                        <input type="checkbox" id="window-seat" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="ml-3 flex-grow">
+                            <span class="block text-sm font-bold text-gray-800">Хочу у окна</span>
+                            <span class="block text-xs text-gray-500">Комфортная посадка</span>
+                        </div>
+                        <span class="text-blue-600 font-bold text-sm">+3 ₾</span>
+                    </label>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 mb-1">ВАШЕ ИМЯ</label>
+                            <input type="text" id="p-name" placeholder="Гиорги" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 mb-1">ТЕЛЕФОН</label>
+                            <input type="tel" id="p-phone" placeholder="+995 5xx xx xx xx" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium">
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="confirmBooking()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 mt-8 transition transform active:scale-95 flex justify-center items-center gap-2">
+                    <span>Подтвердить бронь</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
