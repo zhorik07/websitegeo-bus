@@ -1,0 +1,18 @@
+/* Основной шрифт */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Настройки для главной картинки (Hero Section) */
+.hero-bg {
+    /* 👇 ТЕПЕРЬ ТУТ ТВОЕ ФОТО ТБИЛИСИ */
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../img/hero.jpg');
+    background-size: cover;
+    background-position: center bottom; /* Сместил акцент вниз, чтобы было видно дома */
+    background-repeat: no-repeat;
+}
+
+html { scroll-behavior: smooth; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
