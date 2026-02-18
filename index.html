@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharaGo - Бронирование маршруток</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/ru.js"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/ka.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .hero-bg {
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('img/hero.png');
+            background-size: cover;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        select { appearance: none; -webkit-appearance: none; }
+        
+        .flatpickr-calendar {
+            border: none !important;
+            border-radius: 20px !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important;
+            padding: 10px !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+            background: #1e3a8a !important;
+            border-color: #1e3a8a !important;
+            font-weight: bold;
+        }
+        .flatpickr-months .flatpickr-month { height: 50px; }
+        .flatpickr-current-month { font-size: 110%; font-weight: 700; }
+        .flatpickr-weekdays { margin-bottom: 10px; }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-['Inter']">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20"> 
+                <div class="flex-shrink-0 flex items-center gap-1 cursor-pointer" onclick="window.location.reload()">
+                    <i class="fa-solid fa-van-shuttle text-[#1e3a8a] text-3xl"></i>
+                    <span class="font-extrabold text-2xl tracking-tight text-[#1e3a8a]">Shara<span class="text-yellow-400">Go</span></span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full text-sm text-gray-700 font-mono border border-gray-200 shadow-sm">
+                        <i class="fa-regular fa-clock text-blue-600"></i>
+                        <span id="live-clock" class="font-bold">--:--:--</span>
+                    </div>
+                    
+                    <div class="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
+                        <button onclick="changeLanguage('ka')" id="btn-ka" class="lang-btn px-3 py-2 text-xs font-bold rounded-lg transition text-gray-500 hover:text-gray-900">GEO</button>
+                        <button onclick="changeLanguage('en')" id="btn-en" class="lang-btn px-3 py-2 text-xs font-bold rounded-lg transition text-gray-500 hover:text-gray-900">ENG</button>
+                        <button onclick="changeLanguage('ru')" id="btn-ru" class="lang-btn px-3 py-2 text-xs font-bold rounded-lg transition bg-white text-[#1e3a8a] shadow-sm">RUS</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <section class="hero-bg h-[550px] flex items-center justify-center text-center px-4 relative">
+            <div class="max-w-4xl text-white mt-[-80px]">
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-xl tracking-tight leading-tight" data-lang="hero_title">
+                    Путешествуй по Грузии с комфортом
+                </h1>
+                <p class="text-lg md:text-2xl text-gray-100 drop-shadow-md font-medium max-w-2xl mx-auto" data-lang="hero_subtitle">
+                    Забронируй место сейчас. Оплата водителю.
+                </p>
+            </div>
+        </section>
+
+        <div class="max-w-6xl mx-auto px-4 relative -mt-32 z-20 mb-20">
+            <div class="bg-white rounded-[2rem] shadow-2xl p-6 md:p-8 border border-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    
+                    <div class="relative group">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5 ml-1" data-lang="label_from">Откуда</label>
+                        <div class="flex items-center bg-gray-50 rounded-2xl px-4 border border-transparent group-hover:bg-white group-hover:border-blue-200 transition h-[70px]">
+                            <i class="fa-solid fa-location-dot text-[#1e3a8a] mr-4 text-xl"></i>
+                            <select id="search-from" class="bg-transparent border-none w-full text-gray-900 font-bold focus:outline-none text-lg cursor-pointer h-full">
+                                <option value="tbilisi" data-lang="city_tbilisi">Тбилиси</option>
+                                <option value="kutaisi" data-lang="city_kutaisi">Кутаиси</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="relative group">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5 ml-1" data-lang="label_to">Куда</label>
+                        <div class="flex items-center bg-gray-50 rounded-2xl px-4 border border-transparent group-hover:bg-white group-hover:border-yellow-400 transition h-[70px]">
+                            <i class="fa-solid fa-location-arrow text-yellow-500 mr-4 text-xl"></i>
+                            <select id="search-to" class="bg-transparent border-none w-full text-gray-900 font-bold focus:outline-none text-lg cursor-pointer h-full">
+                                <option value="batumi" data-lang="city_batumi">Батуми</option>
+                                <option value="kazbegi" data-lang="city_kazbegi">Казбеги</option>
+                                <option value="kutaisi" data-lang="city_kutaisi">Кутаиси</option>
+                                <option value="tbilisi" data-lang="city_tbilisi">Тбилиси</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="relative group">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5 ml-1" data-lang="today">Дата</label>
+                        <div class="flex items-center bg-gray-50 rounded-2xl px-4 border border-transparent group-hover:bg-white group-hover:border-blue-200 transition h-[70px] cursor-pointer">
+                            <i class="fa-regular fa-calendar text-[#1e3a8a] mr-4 text-xl"></i>
+                            <input type="text" id="search-date" class="bg-transparent border-none w-full text-gray-900 font-bold focus:outline-none text-lg cursor-pointer h-full placeholder-gray-500">
+                        </div>
+                    </div>
+
+                    <div class="flex items-end">
+                        <button onclick="searchRides()" class="w-full bg-[#1e3a8a] hover:bg-blue-900 text-white font-bold h-[70px] rounded-2xl shadow-xl shadow-blue-900/20 transition transform hover:scale-[1.02] active:scale-95 text-lg flex items-center justify-center gap-3" data-lang="btn_search">
+                            <i class="fa-solid fa-magnifying-glass"></i> Найти
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="max-w-5xl mx-auto px-4 mb-24">
+            <div class="text-center mb-16">
+                <div class="inline-block bg-blue-50 text-[#1e3a8a] px-5 py-2 rounded-full text-sm font-bold mb-6 border border-blue-100" data-lang="service_tag">
+                    🚀 Сервис №1 в Грузии
+                </div>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight" data-lang="about_title">
+                    Хватит играть в рулетку с автовокзалом
+                </h2>
+                <p class="text-gray-500 text-xl max-w-2xl mx-auto leading-relaxed" data-lang="about_text">
+                    SharaGo — это когда ты точно знаешь, что уедешь. Сидя, а не стоя на одной ноге.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition text-center group">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-2xl mb-6 mx-auto group-hover:scale-110 transition">
+                        <i class="fa-solid fa-couch"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-900 text-xl mb-3" data-lang="about_list_1">Твое место — твое</h4>
+                    <p class="text-gray-500" data-lang="about_desc_1">Никто не займет его сумкой или чемоданом.</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition text-center group">
+                    <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center text-2xl mb-6 mx-auto group-hover:scale-110 transition">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-900 text-xl mb-3" data-lang="about_list_2">Честная цена</h4>
+                    <p class="text-gray-500" data-lang="about_desc_2">Как для местных. Никаких наценок для туристов.</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition text-center group">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 mx-auto group-hover:scale-110 transition">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-900 text-xl mb-3" data-lang="about_list_3">Диспетчер — человек</h4>
+                    <p class="text-gray-500" data-lang="about_desc_3">Не робот. Позвонит, подскажет, встретит.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] shadow-xl border border-gray-200 overflow-hidden">
+                <details class="group">
+                    <summary class="flex justify-between items-center p-8 cursor-pointer bg-gray-50 hover:bg-gray-100 transition list-none">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-[#1e3a8a] text-white w-12 h-12 rounded-full flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                            </div>
+                            <div class="text-left">
+                                <h3 class="text-xl font-bold text-gray-900" data-lang="stations_title">Автовокзалы Тбилиси</h3>
+                                <p class="text-gray-500 text-sm" data-lang="stations_subtitle">Нажмите, чтобы увидеть карты</p>
+                            </div>
+                        </div>
+                        <span class="transform group-open:rotate-180 transition duration-300 text-gray-400">
+                            <i class="fa-solid fa-chevron-down text-2xl"></i>
+                        </span>
+                    </summary>
+                    
+                    <div class="p-8 bg-white border-t border-gray-100">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <a href="https://www.google.com/maps/search/Didube+Bus+Terminal+Tbilisi" target="_blank" class="flex items-start gap-4 p-4 rounded-2xl hover:bg-blue-50 transition border border-gray-100 hover:border-blue-200 group/card">
+                                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-bus text-2xl text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-lg group-hover/card:text-[#1e3a8a] transition" data-lang="st_didube">Автовокзал Дидубе</h4>
+                                    <p class="text-sm text-gray-500 mb-2" data-lang="st_didube_desc">На Батуми, Казбеги, Кутаиси</p>
+                                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wide flex items-center gap-1">
+                                        <i class="fa-solid fa-location-arrow"></i> Google Maps
+                                    </span>
+                                </div>
+                            </a>
+
+                            <a href="https://www.google.com/maps/search/Ortachala+Bus+Station+Tbilisi" target="_blank" class="flex items-start gap-4 p-4 rounded-2xl hover:bg-blue-50 transition border border-gray-100 hover:border-blue-200 group/card">
+                                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-bus text-2xl text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-lg group-hover/card:text-[#1e3a8a] transition" data-lang="st_ortachala">Ортачала</h4>
+                                    <p class="text-sm text-gray-500 mb-2" data-lang="st_ortachala_desc">Международные рейсы</p>
+                                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wide flex items-center gap-1">
+                                        <i class="fa-solid fa-location-arrow"></i> Google Maps
+                                    </span>
+                                </div>
+                            </a>
+
+                             <a href="https://www.google.com/maps/search/Isani+Bus+Terminal+Tbilisi" target="_blank" class="flex items-start gap-4 p-4 rounded-2xl hover:bg-blue-50 transition border border-gray-100 hover:border-blue-200 group/card">
+                                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-bus text-2xl text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-lg group-hover/card:text-[#1e3a8a] transition" data-lang="st_isani">Исани</h4>
+                                    <p class="text-sm text-gray-500 mb-2" data-lang="st_isani_desc">Кахетия, Сигнахи</p>
+                                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wide flex items-center gap-1">
+                                        <i class="fa-solid fa-location-arrow"></i> Google Maps
+                                    </span>
+                                </div>
+                            </a>
+                            
+                            <a href="https://www.google.com/maps/search/Tbilisi+Central+Railway+Station" target="_blank" class="flex items-start gap-4 p-4 rounded-2xl hover:bg-blue-50 transition border border-gray-100 hover:border-blue-200 group/card">
+                                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-train text-2xl text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-lg group-hover/card:text-[#1e3a8a] transition" data-lang="st_station">Вокзальная Площадь</h4>
+                                    <p class="text-sm text-gray-500 mb-2" data-lang="st_station_desc">Ж/Д вокзал</p>
+                                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wide flex items-center gap-1">
+                                        <i class="fa-solid fa-location-arrow"></i> Google Maps
+                                    </span>
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <section id="schedule" class="bg-gray-50 py-16 border-t border-gray-200">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-extrabold text-gray-900" data-lang="schedule_title">Ближайшие рейсы</h2>
+                </div>
+                
+                <div class="flex justify-center">
+                    <div id="date-tabs" class="flex overflow-x-auto gap-3 pb-6 mb-4 no-scrollbar px-2 w-full md:w-auto justify-start md:justify-center"></div>
+                </div>
+                
+                <div id="rides-container" class="space-y-6 min-h-[300px]"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+            <div class="col-span-1 md:col-span-2">
+                <div class="inline-block bg-white px-3 py-1 rounded-lg mb-4">
+                    <div class="flex items-center gap-1">
+                        <i class="fa-solid fa-van-shuttle text-[#1e3a8a] text-2xl"></i>
+                        <span class="font-extrabold text-2xl tracking-tight text-[#1e3a8a]">Shara<span class="text-yellow-400">Go</span></span>
+                    </div>
+                </div>
+                
+                <p class="mt-2 text-gray-500 max-w-xs" data-lang="footer_desc">
+                    Первый в Грузии сервис бронирования, который реально работает. Сделано с любовью, хинкали и хачапури ❤️ 🧀
+                </p>
+                <p class="mt-8 text-gray-600">© 2026 SharaGo Georgia.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase tracking-wider" data-lang="footer_popular">Популярное</h4>
+                <ul class="space-y-3">
+                    <li><a href="#" class="hover:text-yellow-400 transition" data-lang="route_tbi_bat">Тбилиси - Батуми</a></li>
+                    <li><a href="#" class="hover:text-yellow-400 transition" data-lang="route_tbi_kaz">Тбилиси - Казбеги</a></li>
+                    <li><a href="#" class="hover:text-yellow-400 transition" data-lang="route_tbi_kut">Тбилиси - Кутаиси</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase tracking-wider" data-lang="footer_contact">Контакты</h4>
+                <ul class="space-y-3">
+                    <li class="flex items-center"><i class="fa-solid fa-headset mr-3 text-blue-500"></i> <span data-lang="footer_disp">Диспетчерская</span></li>
+                    <li class="flex items-center"><i class="fa-solid fa-phone mr-3 text-blue-500"></i> +995 555 00 00 00</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <div id="modal" class="fixed inset-0 bg-black/80 hidden z-[100] overflow-y-auto backdrop-blur-sm transition-opacity">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden transform transition-all grid grid-cols-1 md:grid-cols-5 relative my-8">
+                <button onclick="closeModal()" class="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white rounded-full p-2 transition shadow-sm">
+                    <i class="fa-solid fa-xmark text-2xl text-gray-800"></i>
+                </button>
+
+                <div class="md:col-span-2 bg-gray-100 border-r border-gray-200 flex flex-col">
+                    <div class="h-44 bg-gray-300 overflow-hidden relative">
+                        <img id="modal-car-img" src="" alt="Car" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                        <div class="absolute bottom-3 left-3 text-white">
+                            <p class="font-bold text-xs uppercase tracking-wider bg-yellow-400 text-black px-2 py-0.5 rounded" id="modal-car-name"></p>
+                        </div>
+                    </div>
+                    <div class="px-6 relative -mt-10 mb-2">
+                        <img id="modal-driver-img" src="" alt="Driver" class="w-20 h-20 rounded-full border-4 border-white shadow-md object-cover">
+                    </div>
+                    <div class="px-6 pb-6">
+                        <h3 class="font-bold text-gray-900 text-xl" id="modal-driver-name">--</h3>
+                        <div class="flex items-center text-yellow-500 text-sm mb-4">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <div class="pt-4 border-t border-gray-200">
+                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1" data-lang="modal_route">Маршрут</p>
+                            <p class="text-[#1e3a8a] font-bold text-lg leading-tight" id="modal-route">--</p>
+                            <p class="text-gray-600 font-medium mt-1 flex items-center gap-2">
+                                <i class="fa-regular fa-clock"></i> <span id="modal-time">--:--</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-3 p-6 md:p-8 flex flex-col justify-center">
+                    <h3 class="text-2xl font-extrabold text-gray-900 mb-8" data-lang="modal_title">Бронирование</h3>
+                    
+                    <div class="mb-8">
+                        <label class="block text-sm font-bold text-gray-500 mb-3 uppercase tracking-wide" data-lang="modal_seats">Количество мест</label>
+                        <div class="flex items-center gap-4">
+                            <button onclick="changeSeats(-1)" class="w-12 h-12 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-xl transition">-</button>
+                            <span id="seat-count" class="text-3xl font-bold text-gray-900 w-10 text-center">1</span>
+                            <button onclick="changeSeats(1)" class="w-12 h-12 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-xl transition">+</button>
+                        </div>
+                    </div>
+
+                    <label class="flex items-center p-4 border border-blue-100 bg-blue-50/30 rounded-2xl cursor-pointer hover:bg-blue-50 transition mb-6 group">
+                        <input type="checkbox" id="window-seat" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                        <div class="ml-4 flex-grow">
+                            <span class="block text-sm font-bold text-gray-800 group-hover:text-blue-700 transition" data-lang="option_window">Хочу у окна</span>
+                        </div>
+                        <span class="bg-white text-blue-600 font-bold text-xs py-1 px-2 rounded border border-blue-200 shadow-sm">+3 ₾</span>
+                    </label>
+
+                    <div class="space-y-4">
+                        <input type="text" id="p-name" placeholder="Ваше Имя" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium">
+                        <input type="tel" id="p-phone" placeholder="Номер телефона" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium">
+                    </div>
+
+                    <button onclick="confirmBooking()" class="w-full bg-[#1e3a8a] hover:bg-blue-800 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-900/20 mt-8 transition transform active:scale-[0.98] flex justify-center items-center gap-2 text-lg">
+                        <span data-lang="btn_confirm">Подтвердить</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
